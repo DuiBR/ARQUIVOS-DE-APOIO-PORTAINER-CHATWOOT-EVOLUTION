@@ -12,4 +12,8 @@ Execute os comandos abaixo para atualizar o sistema e garantir permissões adequ
 sudo apt-get update ; apt-get install -y apparmor-utils
 ```
 
-testee
+Defina o nome do host da máquina:
+
+```bash
+hostnamectl set-hostname myserver
+```
