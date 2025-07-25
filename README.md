@@ -16,7 +16,7 @@ Tudo organizado para facilitar o seu aprendizado e aplicação prática! 😉
 
 No meu canal, compartilho **conteúdos técnicos**, dicas práticas, automações, tutoriais e muito mais!  
 Se ainda não conhece, confere lá e se inscreve para não perder nenhum conteúdo novo!  
-🎥 [Acessar Canal no YouTube]([https://www.youtube.com](https://www.youtube.com/@RodrigoTanci))
+🎥 [Acessar Canal no YouTube] - https://www.youtube.com/@RodrigoTanci
 
 ---
 
