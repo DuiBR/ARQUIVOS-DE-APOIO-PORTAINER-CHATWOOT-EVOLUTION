@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  redis:
+    image: redis:latest
+    command: [
+      "redis-server",
+      "--appendonly", "yes",
+      "--port", "6379",
+      "--requirepass", "d5syHUE58s7BgQ",
+      "--maxmemory", "1024mb",
+      "--maxmemory-policy", "allkeys-lru",
+      "--timeout", "0",
+      "--tcp-keepalive", "60",
+      "--save", "900", "1",
+      "--save", "300", "10"
+    ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - swarm_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+
+volumes:
+  redis_data:
+    external: true
+    name: redis_data
+
+networks:
+  swarm_network:
+    external: true
+    name: swarm_network
