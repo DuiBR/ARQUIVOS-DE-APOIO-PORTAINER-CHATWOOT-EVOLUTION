@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    networks:
+      - swarm_network
+    entrypoint: docker-entrypoint.sh
+    command:
+      [
+        "postgres",
+        "--max_connections=300",
+        "--shared_buffers=1GB",
+        "--work_mem=8MB",
+        "--maintenance_work_mem=512MB",
+        "--effective_cache_size=3GB",
+        "--wal_buffers=8MB",
+        "--checkpoint_completion_target=0.9",
+        "--synchronous_commit=off",
+        "--wal_level=replica",
+        "--max_wal_senders=0",
+        "--port=5432",
+        "--timezone=Etc/UTC"
+      ]
+    #ports:
+      #- 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=EN8qHctKBjEK1qhWz501
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+      - TZ=Etc/UTC
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2048M
+
+volumes:
+  postgres_data:
+    external: true
+    name: postgres_data
+
+networks:
+  swarm_network:
+    external: true
+    name: swarm_network
