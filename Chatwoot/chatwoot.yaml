@@ -1,0 +1,179 @@
+version: "3.7"
+
+services:
+  chatwoot_app:
+    image: chatwoot/chatwoot:v4.4.0
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
+    entrypoint: docker/entrypoints/rails.sh
+    volumes:
+      - chatwoot_data:/app/storage 
+      - chatwoot_public:/app/public
+      - chatwoot_mailers:/app/app/views/mailers
+    networks:
+      - swarm_network
+    environment:
+      - CHATWOOT_HUB_URL=https://inovanode.com.br
+      - INSTALLATION_NAME=Chatwoot
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      - SECRET_KEY_BASE=EN8qHctKBjEK1qhWz501
+      - FRONTEND_URL=https://suaurlaqui.com.br
+      - DEFAULT_LOCALE=pt_BR
+      - FORCE_SSL=true
+      - ENABLE_ACCOUNT_SIGNUP=false
+      - REDIS_URL=redis://:d5syHUE58s7BgQ@redis:6379
+      # Postgres
+      - DATABASE_URL=postgresql://postgres:EN8qHctKBjEK1qhWz501@postgres:5432/chatwoot?sslmode=disable
+      
+      # S3
+      - ACTIVE_STORAGE_SERVICE=local
+      #- S3_BUCKET_NAME=
+      #- AWS_ACCESS_KEY_ID=
+      #- AWS_SECRET_ACCESS_KEY=
+      #- AWS_REGION=
+      #- DIRECT_UPLOADS_ENABLED=
+      
+      - RAILS_LOG_TO_STDOUT=true
+      - USE_INBOX_AVATAR_FOR_BOT=true
+      
+      # Número de processos Puma. Com 10 CPUs, 3 workers dá bom balanço entre memória e CPU
+      - WEB_CONCURRENCY=4
+      # Timeout de requisição no Rails (upload, webhooks, etc.)
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=120
+      # Servidor de Email Gmail
+      - MAILER_SENDER_EMAIL=Chatwoot <seuemailsmtp@email.com>
+      - SMTP_DOMAIN=gmail.com
+      - SMTP_ADDRESS=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=seuemailsmtp@email.com
+      - SMTP_PASSWORD=suasenhadeapp_aqui
+      - SMTP_AUTHENTICATION=plain
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - SMTP_OPENSSL_VERIFY_MODE=peer
+      - MAILER_INBOUND_EMAIL_DOMAIN=seuemailsmtp@email.com
+      
+      # App Meta
+      #- FB_VERIFY_TOKEN=
+      #- FB_APP_SECRET=
+      #- FB_APP_ID=
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2048M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.chatwoot_app.rule=Host(`suaurlaqui.com.br`)
+        - traefik.http.routers.chatwoot_app.entrypoints=websecure
+        - traefik.http.routers.chatwoot_app.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.chatwoot_app.priority=1
+        - traefik.http.routers.chatwoot_app.service=chatwoot_app
+        - traefik.http.services.chatwoot_app.loadbalancer.server.port=3000
+        - traefik.http.services.chatwoot_app.loadbalancer.passhostheader=true
+        - traefik.http.services.chatwoot_app.loadbalancer.sticky.cookie=true
+        - traefik.http.services.chatwoot_app.loadbalancer.sticky.cookie.name=Chatwoot_sticky
+        - traefik.http.services.chatwoot_app.loadbalancer.sticky.cookie.secure=true
+        - traefik.http.services.chatwoot_app.loadbalancer.sticky.cookie.httpOnly=true
+        - traefik.http.services.chatwoot_app.loadbalancer.sticky.cookie.sameSite=lax
+        - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.middlewares.upload_limit.buffering.maxRequestBodyBytes=104857600
+        - traefik.http.routers.chatwoot_app.middlewares=sslheader@docker,upload_limit@docker
+
+  chatwoot_sidekiq:
+    image: chatwoot/chatwoot:v4.4.0
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes:
+      - chatwoot_data:/app/storage 
+      - chatwoot_public:/app/public
+      - chatwoot_mailers:/app/app/views/mailers
+    networks:
+      - swarm_network
+    environment:
+      - CHATWOOT_HUB_URL=https://inovanode.com.br
+      - INSTALLATION_NAME=chatwoot
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+      - SECRET_KEY_BASE=bd644d6ed84a6s3t4e7f933f8e01a3ae
+      - FRONTEND_URL=https://suaurlaqui.com.br
+      - DEFAULT_LOCALE=pt_BR
+      - FORCE_SSL=true
+      - ENABLE_ACCOUNT_SIGNUP=false
+      - REDIS_URL=redis://:d5syHUE58s7BgQ@redis:6379
+      # Postgres
+      - DATABASE_URL=postgresql://postgres:EN8qHctKBjEK1qhWz501@postgres:5432/chatwoot?sslmode=disable
+      
+      # S3
+      - ACTIVE_STORAGE_SERVICE=local
+      #- S3_BUCKET_NAME=
+      #- AWS_ACCESS_KEY_ID=
+      #- AWS_SECRET_ACCESS_KEY=
+      #- AWS_REGION=
+      #- DIRECT_UPLOADS_ENABLED=
+      
+      - RAILS_LOG_TO_STDOUT=true
+      - USE_INBOX_AVATAR_FOR_BOT=true
+      
+      # Concurrency por instância Sidekiq. Com 6 CPUs, algo em 20 threads
+      - SIDEKIQ_CONCURRENCY=20
+      # Timeout de requisição no Rails (upload, webhooks, etc.)
+      - RACK_TIMEOUT_SERVICE_TIMEOUT=120
+      # Servidor de Email Gmail
+      - MAILER_SENDER_EMAIL=Chatwoot <seuemailsmtp@email.com>
+      - SMTP_DOMAIN=gmail.com
+      - SMTP_ADDRESS=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USERNAME=seuemailsmtp@email.com
+      - SMTP_PASSWORD=suasenhadeapp_aqui
+      - SMTP_AUTHENTICATION=plain
+      - SMTP_ENABLE_STARTTLS_AUTO=true
+      - SMTP_OPENSSL_VERIFY_MODE=peer
+      - MAILER_INBOUND_EMAIL_DOMAIN=seuemailsmtp@email.com
+
+      
+      # App Meta
+      #- FB_VERIFY_TOKEN=
+      #- FB_APP_SECRET=
+      #- FB_APP_ID=
+      
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2048M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+
+volumes:
+  chatwoot_data:
+    external: true
+    name: chatwoot_data
+  chatwoot_public:
+    external: true
+    name: chatwoot_public  
+  chatwoot_mailers:
+    external: true
+    name: chatwoot_mailers    
+
+networks:
+  swarm_network:
+    external: true
+    name: swarm_network
