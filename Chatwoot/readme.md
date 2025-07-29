@@ -26,7 +26,7 @@ bundle exec rails db:chatwoot_prepare
 Comando para atualizar o chatwoot:
 
 ```bash
-buncle exec rails db:migrate
+bundle exec rails db:migrate
 ```
 
 # 🙌 Apoie este Projeto
