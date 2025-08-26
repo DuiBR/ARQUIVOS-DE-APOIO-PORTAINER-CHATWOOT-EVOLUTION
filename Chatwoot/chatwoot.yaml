@@ -17,7 +17,7 @@ services:
       - NODE_ENV=production
       - RAILS_ENV=production
       - INSTALLATION_ENV=docker
-      - SECRET_KEY_BASE=EN8qHctKBjEK1qhWz501
+      - SECRET_KEY_BASE=bd644d6ed84a6s3t4e7f933f8e01a3ae
       - FRONTEND_URL=https://suaurlaqui.com.br
       - DEFAULT_LOCALE=pt_BR
       - FORCE_SSL=true
