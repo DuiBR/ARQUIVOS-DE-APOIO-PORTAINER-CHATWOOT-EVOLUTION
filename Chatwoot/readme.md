@@ -10,7 +10,9 @@ Execute este comando no container do postgres:
 
 ```bash
 psql -U postgres
+```
 
+```bash
 create DATABASE chatwoot;
 ```
 
