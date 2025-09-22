@@ -9,7 +9,7 @@ Este guia fornece os passos para instalar rapidamente o Chatwoot e suas dependen
 Execute este comando no container do postgres:
 
 ```bash
-psql --U postgres
+psql -U postgres
 
 create DATABASE chatwoot;
 ```
