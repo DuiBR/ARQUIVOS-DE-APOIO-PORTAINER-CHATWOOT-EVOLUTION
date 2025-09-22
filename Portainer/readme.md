@@ -84,6 +84,13 @@ Depois, faça o deploy do stack:
 docker stack deploy --prune --resolve-image always -c portainer.yaml portainer
 ```
 
+restart portainer:
+
+```bash
+docker service update --force portainer_portainer
+docker service update --force portainer_agent
+```
+
 # 🙌 Apoie este Projeto
 Se este conteúdo te ajudou e você quiser apoiar o projeto, você pode enviar um Pix:
 
